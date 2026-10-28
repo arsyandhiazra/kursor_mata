@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kursor Mata: gerakkan kursor dengan pandangan mata</title>
+<meta name="description" content="Program Python untuk menggerakkan kursor mouse dengan arah pandangan mata memakai kamera web biasa. Oleh Zulfa Arsyandhi Azra.">
+<meta name="author" content="Zulfa Arsyandhi Azra">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%91%81%3C/text%3E%3C/svg%3E">
+<style>
+:root{color-scheme:light dark;--bg:#eef2f6;--panel:#fff;--ink:#14202b;--mute:#52606d;--line:#cdd6df;--code:#e1e8ef;--acc:#3340c4;--on-acc:#fff;--raw:#b86e00}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1720;--panel:#16202b;--ink:#e6edf3;--mute:#9aa8b6;--line:#2a3643;--code:#1b2733;--acc:#8b9bff;--on-acc:#0f1720;--raw:#f0a93a}}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.6 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:0 22px}
+h1,h2{font-family:Charter,"Iowan Old Style","Palatino Linotype",Georgia,serif;line-height:1.15;letter-spacing:-.01em;margin:0}
+h1{font-size:clamp(2.2rem,5.4vw,3.5rem);font-weight:700}
+h2{font-size:1.7rem;margin-bottom:.8rem}
+a{color:var(--acc)}
+a:focus-visible,button:focus-visible,summary:focus-visible{outline:3px solid var(--acc);outline-offset:3px;border-radius:4px}
+code{font:.88em ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;background:var(--code);padding:.1em .35em;border-radius:4px}
+pre{background:var(--code);padding:14px 16px;border-radius:8px;overflow-x:auto;margin:.6rem 0;line-height:1.5}
+pre code{background:none;padding:0}
+header.hero{padding:56px 0 40px;display:grid;grid-template-columns:1.05fr 1fr;gap:40px;align-items:center}
+.lead{font-size:1.15rem;color:var(--mute);max-width:34em;margin:1rem 0 1.4rem}
+.btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn{display:inline-block;padding:11px 20px;border-radius:8px;text-decoration:none;font-weight:600;border:2px solid var(--acc)}
+.btn.main{background:var(--acc);color:var(--on-acc)}
+.by{margin:1.6rem 0 0;color:var(--mute);font-size:.95rem}
+.by b{color:var(--ink)}
+.demo{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:12px}
+#demo{display:block;width:100%;aspect-ratio:4/3;border-radius:8px;background:var(--bg);cursor:crosshair;touch-action:none}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;margin:10px 4px 2px;font-size:.85rem;color:var(--mute)}
+.legend i{display:inline-block;vertical-align:middle;margin-right:6px}
+.k-raw{width:7px;height:7px;border-radius:50%;background:var(--raw)}
+.k-out{width:13px;height:13px;border-radius:50%;border:2.5px solid var(--acc)}
+.k-rad{width:15px;height:15px;border-radius:50%;border:1.5px dashed var(--mute)}
+section{padding:36px 0;border-top:1px solid var(--line)}
+section p{max-width:42em}
+table{border-collapse:collapse;width:100%;background:var(--panel);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+th,td{text-align:left;padding:11px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-weight:600;background:var(--code)}
+tr:last-child td{border:0}
+.scroll{overflow-x:auto}
+.keys{margin-top:.9rem;color:var(--mute);font-size:.95rem}
+ol.steps{padding-left:1.3rem;max-width:44em}
+ol.steps li{margin-bottom:1.2rem;padding-left:.3rem}
+dl.facts{display:grid;grid-template-columns:11em 1fr;gap:14px 24px;margin:0;max-width:46em}
+dl.facts dt{font-weight:600}
+dl.facts dd{margin:0;color:var(--mute)}
+footer{border-top:1px solid var(--line);padding:26px 0 44px;color:var(--mute);font-size:.92rem}
+@media (max-width:760px){header.hero{grid-template-columns:1fr;padding-top:36px}dl.facts{grid-template-columns:1fr;gap:2px}dl.facts dd{margin-bottom:12px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="hero">
+  <div>
+    <h1>Gerakkan kursor dengan arah pandangan mata</h1>
+    <p class="lead">Kursor Mata memakai kamera web biasa untuk membaca ke mana Anda menatap, lalu menggeser kursor ke sana. Kedipkan mata untuk mengeklik.</p>
+    <div class="btns">
+      <a class="btn main" href="#mulai">Cara memasang</a>
+      <a class="btn" href="kursor_mata.py">Lihat kode sumber</a>
+    </div>
+    <p class="by">Dibuat oleh <b>Zulfa Arsyandhi Azra</b></p>
+  </div>
+  <div class="demo">
+    <canvas id="demo" role="img" aria-label="Demo penyaring pandangan: titik oranye adalah pandangan mentah yang bergetar, cincin biru adalah kursor yang sudah distabilkan."></canvas>
+    <div class="legend">
+      <span><i class="k-raw"></i>pandangan mentah</span>
+      <span><i class="k-out"></i>kursor tersaring</span>
+      <span><i class="k-rad"></i>radius fiksasi</span>
+    </div>
+  </div>
+</header>
+
+<section id="kontrol">
+  <h2>Mengeklik dengan kedip</h2>
+  <div class="scroll">
+  <table>
+    <thead><tr><th>Gerakan</th><th>Hasil</th></tr></thead>
+    <tbody>
+      <tr><td>Kedip sekali</td><td>Klik kiri</td></tr>
+      <tr><td>Kedip dua kali berurutan</td><td>Klik ganda</td></tr>
+      <tr><td>Kedip lama (sekitar 0,7 detik atau lebih)</td><td>Klik kanan</td></tr>
+      <tr><td>Mata tertutup 2 detik</td><td>Jeda atau lanjut</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <p class="keys">Kedip alami yang sangat cepat diabaikan. Di jendela pratinjau: <code>q</code> atau <code>Esc</code> keluar, <code>p</code> jeda, <code>c</code> klik hidup/mati, <code>t</code> tambah data latih, <code>k</code> latih ulang dari nol.</p>
+</section>
+
+<section id="mulai">
+  <h2>Mulai memakai</h2>
+  <ol class="steps">
+    <li>Pasang paket Python di folder proyek.
+<pre><code>python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt</code></pre></li>
+    <li>Jalankan. Klik ganda <code>Kursor_Mata.command</code> di macOS, atau ketik:
+<pre><code>python3 kursor_mata.py</code></pre></li>
+    <li>Izinkan kamera dan Aksesibilitas di Pengaturan Sistem &gt; Privasi &amp; Keamanan, supaya kursor boleh bergerak.</li>
+    <li>Ikuti pelatihan pertama: duduk tegak sekitar 50 sampai 60 cm dari layar, kepala diam, hanya mata yang bergerak.</li>
+  </ol>
+</section>
+
+<section id="catatan">
+  <h2>Yang perlu diketahui</h2>
+  <dl class="facts">
+    <dt>Pelatihan</dt>
+    <dd>Anda menatap 20 titik di layar sebanyak 3 putaran, lalu program menguji akurasinya pada 7 titik baru. Hasilnya tersimpan di <code>~/.kursor_mata</code>, jadi pembukaan berikutnya langsung siap.</dd>
+    <dt>Penyaring pandangan</dt>
+    <dd>Selama Anda menatap satu area, kursor memakai rata-rata berjalan sehingga tidak bergetar. Saat tatapan pindah, kursor langsung menyusul. Coba pada demo di atas.</dd>
+    <dt>Privasi</dt>
+    <dd>Gambar kamera diproses di komputer Anda dan tidak disimpan. Yang tersimpan hanya angka fitur mata untuk pelatihan.</dd>
+  </dl>
+</section>
+
+<footer>
+  Dibuat oleh Zulfa Arsyandhi Azra. Lisensi MIT. Pelacak wajah memakai model Face Landmarker dari Google MediaPipe.
+</footer>
+</div>
+
+<script>
+(()=>{
+const cv=document.getElementById('demo'),g=cv.getContext('2d');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const R=34,NMAKS=12,KONF=3,LUNAK=.85;
+let W=0,H=0,ptr=null,pusat=null,n=0,calon=[],out=null,trail=[],last=0;
+function size(){const r=cv.getBoundingClientRect(),d=devicePixelRatio||1;W=r.width;H=r.height;cv.width=W*d;cv.height=H*d;g.setTransform(d,0,0,d,0,0)}
+size();addEventListener('resize',size);
+cv.addEventListener('pointermove',e=>{const r=cv.getBoundingClientRect();ptr=[e.clientX-r.left,e.clientY-r.top]});
+cv.addEventListener('pointerleave',()=>{ptr=null});
+const dist=(a,b)=>Math.hypot(a[0]-b[0],a[1]-b[1]);
+const noise=()=>(Math.random()+Math.random()+Math.random()-1.5)*24;
+// Sama dengan SaringanFiksasi di kursor_mata.py
+function saring(p){
+  if(!pusat){pusat=p.slice();n=1;out=p.slice();return}
+  if(dist(p,pusat)<=R){n=Math.min(n+1,NMAKS);pusat=[pusat[0]+(p[0]-pusat[0])/n,pusat[1]+(p[1]-pusat[1])/n];calon=[]}
+  else{
+    if(calon.length&&dist(p,calon[calon.length-1])>1.5*R)calon=[];
+    calon.push(p);
+    if(calon.length>=KONF){pusat=[calon.reduce((s,c)=>s+c[0],0)/calon.length,calon.reduce((s,c)=>s+c[1],0)/calon.length];n=calon.length;calon=[]}
+  }
+  out=[out[0]+LUNAK*(pusat[0]-out[0]),out[1]+LUNAK*(pusat[1]-out[1])];
+}
+function frame(t){
+  requestAnimationFrame(frame);
+  if(t-last<33)return;last=t;
+  g.clearRect(0,0,W,H);
+  if(!ptr){
+    pusat=null;trail=[];
+    g.fillStyle=css('--mute');g.font='15px system-ui,sans-serif';g.textAlign='center';
+    g.fillText('Arahkan penunjuk ke area ini',W/2,H/2);
+    return;
+  }
+  const raw=[ptr[0]+noise(),ptr[1]+noise()];
+  saring(raw);
+  trail.push(raw);if(trail.length>36)trail.shift();
+  g.fillStyle=css('--raw');
+  trail.forEach((p,i)=>{g.globalAlpha=.15+.6*i/trail.length;g.beginPath();g.arc(p[0],p[1],3,0,7);g.fill()});
+  g.globalAlpha=1;
+  g.strokeStyle=css('--mute');g.lineWidth=1.5;g.setLineDash([4,4]);
+  g.beginPath();g.arc(pusat[0],pusat[1],R,0,7);g.stroke();g.setLineDash([]);
+  g.strokeStyle=css('--acc');g.fillStyle=css('--acc');g.lineWidth=2.5;
+  g.beginPath();g.arc(out[0],out[1],9,0,7);g.stroke();
+  g.beginPath();g.arc(out[0],out[1],2.5,0,7);g.fill();
+}
+requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>
